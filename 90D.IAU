@@ -1,0 +1,16 @@
+#Need to run on DC
+import-module activedirectory
+
+$domain = “domain.CONTOSO.com”
+
+$DaysInactive = 90
+
+$time = (Get-Date).Adddays(-($DaysInactive))
+
+# Get all AD User with lastLogonTimestamp less than our time and set to enable
+
+Get-ADUser -Filter {LastLogonTimeStamp -lt $time -and enabled -eq $true} -Properties LastLogonTimeStamp |
+
+# Output Name and lastLogonTimestamp into CSV
+
+select-object Name,@{Name=”Stamp”; Expression={[DateTime]::FromFileTime($_.lastLogonTimestamp).ToString(‘yyyy-MM-dd_hh:mm:ss’)}} | export-csv 90-OLD_User.csv –notypeinformation
