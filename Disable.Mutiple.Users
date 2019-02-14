@@ -1,0 +1,13 @@
+# Load AD module
+import-module activedirectory
+
+#Target users NT name - ie mcasanova
+$users= "" , "mcasanova", "Target2", "Target3", "Target4", "Target5", "Target6", "Target7", "Target8", "Target9"
+
+foreach($user in $users){ 
+    Get-ADUser -Identity $user | Disable-ADAccount
+}
+
+foreach($user in $users){ 
+Get-ADUser -Identity $user| select-object name, enabled
+}
