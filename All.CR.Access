@@ -1,0 +1,29 @@
+# Bellow Command logs into the Exchange Powershell Profile, This is needed if you are running the command via ISE on the CAS or DAG
+Add-PSSnapin Microsoft.Exchange.Management.PowerShell.SnapIn
+# Bellow adds all the DR. Calanders to the a user "$Targetuser" ; $access refrences the access they need
+$targetuser="a_olsen@chgsd.com"
+$access="editor" #editor/reviewer/owner
+#Target-Mailboxes bellow
+add-MailboxFolderPermission Conf_Calsada@chgsd.com:\Calendar -User $targetuser -AccessRights $access
+start-sleep -s 2
+# 
+add-MailboxFolderPermission conf_cesena@chgsd.com:\Calendar -User $targetuser -AccessRights $access
+start-sleep -s 2
+# 
+add-MailboxFolderPermission conf_vitela@chgsd.com:\Calendar -User $targetuser -AccessRights $access
+start-sleep -s 2
+# 
+add-MailboxFolderPermission conf_dato@chgsd.com:\Calendar -User $targetuser -AccessRights $access
+start-sleep -s 2
+# 
+add-MailboxFolderPermission conf_chg@chgsd.com:\Calendar -User $targetuser -AccessRights $access
+start-sleep -s 2
+# 
+add-MailboxFolderPermission conf_salas@chgsd.com:\Calendar -User $targetuser -AccessRights $access
+start-sleep -s 2
+# 
+add-MailboxFolderPermission conf_holt@chgsd.com:\Calendar -User $targetuser -AccessRights $access
+#
+#To remove a users access to a calander swap in remove-mailboxpermission in place of add-MailboxPermisions and remove the "-AccessRights $access" flag
+#
+#To Change a users access to a calander swap in set-mailboxpermission in place of add-MailboxPermisions with appropriate "-AccessRights $access" flag
