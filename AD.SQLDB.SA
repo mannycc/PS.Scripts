@@ -1,0 +1,104 @@
+###
+# Created by Manny Casanova  - mcasanova@chgsd.com / mannycasanova@gmail.com 2019
+# This script will do the following
+# Section 1 - Grabs NTLogon's and XT roles and saves them to a object called "SQLXT" it will pass logged in credentials so you need to make sure your using an account that has SQLDB/Table read access
+# Section 2 - Does multiple things
+# - Query's users last name against variables in a text document based on the quarter. These can be changed, but are currently set up.
+# - Filter's out users who are disabled and dumps them into a object
+# - Grabs defined AD -Properties and then adds custom object variables for EXCEL Column formating
+# - Grabs and filters data from "SQLXT" object and adds custom object variables for EXCEL Column formating
+# Section 3 - Exports to CSV
+###
+###Section 1 - begin###
+function sql(
+$sqlText = "select
+  
+   
+       qu.loginid,
+  
+   
+       qu.userid,
+  
+   
+       qr.description
+  
+   
+from Target.Database..quser qu
+  
+   
+       join Target.Database..userrole ur on qu.userid = ur.userid
+  
+   
+       join Target.Database..qrole qr on ur.roleid = qr.roleid
+  
+  
+order by qu.loginid,
+  
+   
+       qr.description",
+$database = "Target.Database",
+$server = "Target.Database.Server"
+)
+ 
+{
+    $connection = new-object System.Data.SqlClient.SQLConnection("Data Source=$server;Integrated Security=SSPI;Initial Catalog=$database");
+    $cmd = new-object System.Data.SqlClient.SqlCommand($sqlText, $connection);
+  
+    $connection.Open();
+    $reader = $cmd.ExecuteReader()
+  
+    $results = @()
+    while ($reader.Read())
+    {
+        $row = @{}
+        for ($i = 0; $i -lt $reader.FieldCount; $i++)
+        {
+            $row[$reader.GetName($i)] = $reader.GetValue($i)
+        }
+        $results += new-object psobject -property $row          
+    }
+    $connection.Close();
+  
+    $results
+}
+  
+$SQLXT = sql
+###Section 1 - End ###
+###Section 2 - Begin ###
+$date = get-date -f yyyy-MM-dd
+$List = Get-Content C:\Q4.txt
+$Q= "Q4"
+  
+$SecurityReport = @()
+  
+foreach ($Item in $List)
+{
+    $ActiveUsers = Get-ADUser -Filter 'enabled -eq $true'-Properties GivenName, Surname, Name, SamAccountName, UserPrincipalName, Department, LastLogonDate | where {$_.Surname -like "$Item*"}
+       
+    foreach ($ActiveUser in $ActiveUsers)
+    {  
+        $Sec1 = @(Get-ADPrincipalGroupMembership $ActiveUser | where {$_.GroupCategory -eq "Security"} | foreach { $_.Name })
+        $Sec2 = $Sec1 | Out-String
+  
+        $XT1 = $ActiveUser.SamAccountName
+        $XT2 = $SQLXT -match $XT1 | foreach { $_.description}
+        $XT3 = $XT2 | Out-String
+  
+               
+        $SecurityReportobj = New-Object PSObject
+        $SecurityReportobj | Add-Member -type NoteProperty -Name LastName -Value $ActiveUser.GivenName
+        $SecurityReportobj | Add-Member -type NoteProperty -Name FirstName -Value $ActiveUser.Surname
+        $SecurityReportobj | Add-Member -type NoteProperty -Name DisplayName -Value $ActiveUser.Name
+        $SecurityReportobj | Add-Member -type NoteProperty -Name NTLogon -Value $ActiveUser.SamAccountName
+        $SecurityReportobj | Add-Member -type NoteProperty -Name Email -Value $ActiveUser.UserPrincipalName
+        $SecurityReportobj | Add-Member -type NoteProperty -Name Department -Value $ActiveUser.Department
+        $SecurityReportobj | Add-Member -type NoteProperty -Name LastLogonDate -Value $ActiveUser.LastLogonDate
+        $SecurityReportobj | Add-Member -type NoteProperty -Name SecurityGroups -Value $Sec2
+        $SecurityReportobj | Add-Member -type NoteProperty -Name XTRights -Value $XT3
+        $SecurityReport += $SecurityReportobj
+     }
+}
+ ###Section 2 - End ###
+ ###Section 3 - Begin ###
+$SecurityReport | export-csv "c:\MUSA\MUSA.users.$date.csv" -NoTypeInformation
+###Section 3 - End ###
