@@ -1,0 +1,11 @@
+
+# Load AD module
+import-module activedirectory
+
+#Import-Csv C:\scripts\rmvADuser\Users.csv
+
+#Disable from TEXT list
+Get-Content C:\scripts\rmvADuser\Users.txt | ForEach-Object {
+$samAccountName = $_."samAccountName" 
+Get-ADUser -Identity $samAccountName | Disable-ADAccount
+}
