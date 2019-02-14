@@ -1,0 +1,133 @@
+
+#Get-Mailbox for specific user and split into mutiple .psts by year
+$mailboxes=Get-User -RecipientTypeDetails UserMailbox | where {$_.Lastname -like "warre*"} | select name,WindowsEmailAddress
+#
+Foreach($mailbox in $mailboxes){
+$mailboxname = $mailbox.name
+$emailaddress = $mailbox.WindowsEmailAddress.ToString() 
+$Batch = 
+#
+New-MailboxExportRequest -BatchName $batch -Mailbox "$mailboxname" `
+-Name “ExportD-$mailboxname” `
+-ContentFilter {(Received -lt '01/01/1990') -and (Sent -lt '01/01/1990')} `
+-FilePath “\\TARGETFOLDER\$emailaddress.1990.pst” | Out-Null
+}  
+#
+#$services = "Service Bus *"
+#$maxRepeat = 20
+#$status = "Completed" # change to Stopped if you want to wait for services to start
+#
+do 
+{
+    $count = (Get-MailboxExportRequest | ? {$_.status -eq "Completed" -or $_.status -eq "Failed"}).count
+    sleep -seconds 600
+} until ($count -eq 1 )
+#
+Get-Date
+Get-MailboxExportRequest
+Get-MailboxExportRequest | Remove-MailboxExportRequest -Confirm:$false
+# --------------------------1990-1995--------------------------------------------------------
+Foreach($mailbox in $mailboxes){
+$mailboxname = $mailbox.name
+$emailaddress = $mailbox.WindowsEmailAddress.ToString() 
+$Batch = 
+#
+New-MailboxExportRequest -BatchName $batch -Mailbox "$mailboxname" `
+-Name “ExportD-$mailboxname” `
+-ContentFilter {(Received -gt '01/01/1990') -and (Received -lt '01/01/1995') -and (Sent -gt '01/01/1990') -and (Sent -lt '01/01/1995')} `
+-FilePath “\\TARGETFOLDER\$emailaddress.1995.pst” | Out-Null
+}
+#
+do 
+{
+    $count = (Get-MailboxExportRequest | ? {$_.status -eq "Completed" -or $_.status -eq "Failed"}).count
+    sleep -seconds 600
+} until ($count -eq 1 )
+#
+Get-Date
+Get-MailboxExportRequest
+Get-MailboxExportRequest | Remove-MailboxExportRequest -Confirm:$false  
+# --------------------------1995-2000--------------------------------------------------------
+Foreach($mailbox in $mailboxes){
+$mailboxname = $mailbox.name
+$emailaddress = $mailbox.WindowsEmailAddress.ToString() 
+$Batch = 
+#
+New-MailboxExportRequest -BatchName $batch -Mailbox "$mailboxname" `
+-Name “ExportD-$mailboxname” `
+-ContentFilter {(Received -gt '01/01/1995') -and (Received -lt '01/01/2000') -and (Sent -gt '01/01/1995') -and (Sent -lt '01/01/2000')} `
+-FilePath “\\TARGETFOLDER\$emailaddress.2000.pst” | Out-Null
+}
+#
+do 
+{
+    $count = (Get-MailboxExportRequest | ? {$_.status -eq "Completed" -or $_.status -eq "Failed"}).count
+    sleep -seconds 600
+} until ($count -eq 1 )
+#
+Get-Date
+Get-MailboxExportRequest
+Get-MailboxExportRequest | Remove-MailboxExportRequest -Confirm:$false 
+# --------------------------2000-2005--------------------------------------------------------
+Foreach($mailbox in $mailboxes){
+$mailboxname = $mailbox.name
+$emailaddress = $mailbox.WindowsEmailAddress.ToString() 
+$Batch = 
+#
+New-MailboxExportRequest -BatchName $batch -Mailbox "$mailboxname" `
+-Name “ExportD-$mailboxname” `
+-ContentFilter {(Received -gt '01/01/2000') -and (Received -lt '01/01/2005') -and (Sent -gt '01/01/2000') -and (Sent -lt '01/01/2005')} `
+-FilePath “\\TARGETFOLDER\$emailaddress.2005.pst” | Out-Null
+}
+#
+do 
+{
+    $count = (Get-MailboxExportRequest | ? {$_.status -eq "Completed" -or $_.status -eq "Failed"}).count
+    sleep -seconds 600
+} until ($count -eq 1 )
+#
+Get-Date
+Get-MailboxExportRequest
+Get-MailboxExportRequest | Remove-MailboxExportRequest -Confirm:$false 
+# --------------------------2005-2010--------------------------------------------------------
+Foreach($mailbox in $mailboxes){
+$mailboxname = $mailbox.name
+$emailaddress = $mailbox.WindowsEmailAddress.ToString() 
+$Batch = 
+#
+New-MailboxExportRequest -BatchName $batch -Mailbox "$mailboxname" `
+-Name “ExportD-$mailboxname” `
+-ContentFilter {(Received -gt '01/01/2005') -and (Received -lt '01/01/2010') -and (Sent -gt '01/01/2005') -and (Sent -lt '01/01/2010')} `
+-FilePath “\\TARGETFOLDER\$emailaddress.2010.pst” | Out-Null
+}
+#
+do 
+{
+    $count = (Get-MailboxExportRequest | ? {$_.status -eq "Completed" -or $_.status -eq "Failed"}).count
+    sleep -seconds 600
+} until ($count -eq 1 )
+#
+Get-Date
+Get-MailboxExportRequest
+Get-MailboxExportRequest | Remove-MailboxExportRequest -Confirm:$false 
+# --------------------------2010-2016--------------------------------------------------------
+Foreach($mailbox in $mailboxes){
+$mailboxname = $mailbox.name
+$emailaddress = $mailbox.WindowsEmailAddress.ToString() 
+$Batch = 
+#
+New-MailboxExportRequest -BatchName $batch -Mailbox "$mailboxname" `
+-Name “ExportD-$mailboxname” `
+-ContentFilter {(Received -gt '01/01/2010') -and (Received -lt '05/02/2016') -and (Sent -gt '01/01/2010') -and (Sent -lt '05/02/2016')} `
+-FilePath “\\TARGETFOLDER\$emailaddress.2016.pst” | Out-Null
+}
+#
+do 
+{
+    $count = (Get-MailboxExportRequest | ? {$_.status -eq "Completed" -or $_.status -eq "Failed"}).count
+    sleep -seconds 600
+} until ($count -eq 1 )
+#
+Get-Date
+Get-MailboxExportRequest
+Get-MailboxExportRequest | Remove-MailboxExportRequest -Confirm:$false 
