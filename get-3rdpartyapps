@@ -1,0 +1,11 @@
+#Build Array
+$List = @()
+# x64
+$list += Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object @{Name = "Name"; Expression = {$_.DisplayName}}, @{Name = "Vendor"; Expression = {$_.Publisher}}, @{Name = "Version"; Expression = {$_.DisplayVersion}}
+# x86
+$list += Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object @{Name = "Name"; Expression = {$_.DisplayName}}, @{Name = "Vendor"; Expression = {$_.Publisher}}, @{Name = "Version"; Expression = {$_.DisplayVersion}}
+# Misc
+$list += Get-WMIobject -class win32_product | Select-Object Name, Vendor, Version, caption
+hostname >> c:\Parents_3rdpApps.txt
+# scrub data, format and export to .txt 
+$list | Sort-object name -Unique | Select-Object Name, Vendor, Version, caption >> c:\Parents_3rdpApps.txt
