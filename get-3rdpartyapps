@@ -1,11 +1,31 @@
 #Build Array
 $List = @()
-# x64
+ 
+<# x64, x86, Misc Reg hive#>
 $list += Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object @{Name = "Name"; Expression = {$_.DisplayName}}, @{Name = "Vendor"; Expression = {$_.Publisher}}, @{Name = "Version"; Expression = {$_.DisplayVersion}}
-# x86
 $list += Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object @{Name = "Name"; Expression = {$_.DisplayName}}, @{Name = "Vendor"; Expression = {$_.Publisher}}, @{Name = "Version"; Expression = {$_.DisplayVersion}}
-# Misc
 $list += Get-WMIobject -class win32_product | Select-Object Name, Vendor, Version, caption
+ 
+<# Search RegApps and scrub Known apps, add all remaining apps to the $list #>
+$KA = @(
+"File Explorer",
+"Paint",
+".*Windows*.",
+"Internet Explorer",
+"Google Chrome",
+"Notepad",
+"Wordpad",
+".*LibreOffice*.")
+ 
+$RA = get-item -path HKLM:\software\wow6432Node\RegisteredApplications
+ 
+foreach ($item in $ra.Property){
+$obj = New-object psobject
+ 
+if ($KA | ?{$item -match $_}){}
+Else {$obj | add-member -type NoteProperty -Name Name -Value $item; $list += $obj}
+}
+ 
+# Write hostname to .txt; scrub data, format and export to .txt 
 hostname >> c:\Parents_3rdpApps.txt
-# scrub data, format and export to .txt 
-$list | Sort-object name -Unique | Select-Object Name, Vendor, Version, caption >> c:\Parents_3rdpApps.txt
+$list | Sort-object name -Unique | Select-Object Name, Vendor, Version, caption >> c:\Parents_3rdpApps.txt 
